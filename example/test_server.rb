@@ -3,7 +3,7 @@
 
 require_relative 'simple_amqp_server'
 
-class TestServer < SimpleAmqpServer
+class TestServer < SimpleAmqpServer::Base
 
   def handle_square_request(interaction)
     number = interaction.request_parameter('number')
