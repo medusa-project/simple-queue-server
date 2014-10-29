@@ -5,12 +5,12 @@ require 'simple_amqp_server/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "simple_amqp_server"
-  spec.version       = SimpleAmqp::VERSION
+  spec.version       = SimpleAmqpServer::VERSION
   spec.authors       = ["Howard Ding"]
   spec.email         = ["hding2@illinois.edu"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Simple way to make an AMQP server}
+  spec.description   = %q{Follow some simple conventions to make a simple AMQP server.}
+  spec.homepage      = "https://github.com/medusa-project/simple-amqp-server"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

@@ -1,10 +1,10 @@
 # SimpleAmqpServer
 
 This gem makes it easy to put up a server listening and responding to requests via AMQP. Simply subclass SimpleAmqpServer::Base,
-follow the conventions for messages, and add handlers for each action you want to handle.
+configure, follow the conventions for messages, and add handlers for each action you want to handle.
 
 As things are now this is a simple, single-threaded server. It wouldn't be that hard to extend it for additional
-functionality if desired.
+functionality if desired. 
 
 ## Installation
 
