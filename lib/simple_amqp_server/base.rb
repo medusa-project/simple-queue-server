@@ -29,12 +29,11 @@ module SimpleAmqpServer
     end
 
     def initialize_logger
-      #To get started, start up a server that just reads requests from the queue and logs them
+      [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
       self.logger = Logging.logger[config.server_name]
       self.logger.add_appenders(Logging.appenders.file(self.log_file, :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l: %m\n')))
       self.logger.level = :info
       self.logger.info 'Starting server'
-      [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
     end
 
     def log_directory
