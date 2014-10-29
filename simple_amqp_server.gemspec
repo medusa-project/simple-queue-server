@@ -5,7 +5,7 @@ require 'simple_amqp_server/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "simple_amqp_server"
-  spec.version       = SimpleAmqpServer::VERSION
+  spec.version       = SimpleAmqp::VERSION
   spec.authors       = ["Howard Ding"]
   spec.email         = ["hding2@illinois.edu"]
   spec.summary       = %q{TODO: Write a short summary. Required.}
@@ -17,6 +17,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
+
+  spec.add_runtime_dependency "bunny"
+  spec.add_runtime_dependency "logging"
+  spec.add_runtime_dependency "uuid"
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"

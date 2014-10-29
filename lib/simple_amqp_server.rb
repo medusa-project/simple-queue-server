@@ -2,8 +2,8 @@ require 'logging'
 require 'bunny'
 require 'fileutils'
 require_relative "simple_amqp_server/version"
-require_relative 'simple_amqp_server_config'
-require_relative 'simple_amqp_interaction'
+require_relative 'simple_amqp_server/config'
+require_relative 'simple_amqp/interaction'
 
 class SimpleAmqpServer < Object
 
@@ -17,7 +17,7 @@ class SimpleAmqpServer < Object
   end
 
   def config_class
-    SimpleAmqpServerConfig
+    SimpleAmqpServer::Config
   end
 
   def initialize_config(config_file)
@@ -92,7 +92,7 @@ class SimpleAmqpServer < Object
 
   def service_saved_requests
     Dir[File.join(self.request_directory, '*-*')].each do |file|
-      interaction = SimpleAmqpInteraction.new(File.read(file), File.basename(file))
+      interaction = SimpleAmqpServer::Interaction.new(File.read(file), File.basename(file))
       self.logger.info "Restarting Request: #{interaction.uuid}\n#{interaction.raw_request}"
       service_request(interaction)
       shutdown if halt_before_processing
@@ -100,7 +100,7 @@ class SimpleAmqpServer < Object
   end
 
   def service_incoming_request(request)
-    interaction = SimpleAmqpInteraction.new(request)
+    interaction = SimpleAmqpServer::Interaction.new(request)
     logger.info "Started Request: #{interaction.uuid}\n#{request}"
     persist_request(interaction)
     service_request(interaction)
