@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'simple_amqp_server/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "simple_amqp_server"
+  spec.name          = "simple-amqp-server"
   spec.version       = SimpleAmqpServer::VERSION
   spec.authors       = ["Howard Ding"]
   spec.email         = ["hding2@illinois.edu"]
