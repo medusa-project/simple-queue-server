@@ -60,6 +60,8 @@ at values.
 If you want a specialized config class you can override the config_class method of SimpleAmqpServer::Base and 
 subclass SimpleAmqpServer::Config. 
  
+Note that both queues are persistent (the server will make them if they don't already exist) and outgoing messages
+ are also persistent. 
 
 ### Message protocol
 
