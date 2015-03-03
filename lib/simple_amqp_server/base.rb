@@ -127,8 +127,8 @@ module SimpleAmqpServer
         dispatch_and_handle_request(interaction)
       end
       unpersist_request(interaction)
-      outgoing_queue.channel.default_exchange.publish(interaction.response.to_json, :routing_key => outgoing_queue.name, :persistent => true) if self.outgoing_queue
       logger.info "Returning: #{interaction.response.to_json}"
+      outgoing_queue.channel.default_exchange.publish(interaction.response.to_json, :routing_key => outgoing_queue.name, :persistent => true) if self.outgoing_queue
       logger.info "Finished Request: #{interaction.uuid}"
     end
 
