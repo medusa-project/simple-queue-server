@@ -56,12 +56,13 @@ module SimpleAmqpServer
       connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
       amqp_connection = Bunny.new(connection_params)
       amqp_connection.start
+      self.logger.info("Connected to AMQP server")
       self.channel = amqp_connection.create_channel
       self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
       self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
     rescue OpenSSL::SSL::SSLError => e
-      self.logger("Error opening amqp connection: #{e}")
-      self.logger("Retrying")
+      self.logger.error("Error opening amqp connection: #{e}")
+      self.logger.error("Retrying")
       sleep 5
       self.initialize_amqp
     end
