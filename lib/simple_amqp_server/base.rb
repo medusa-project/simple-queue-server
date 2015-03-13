@@ -54,7 +54,7 @@ module SimpleAmqpServer
 
     def initialize_amqp
       connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
-      amqp_connection = Bunny.new(config.amqp(connection_params))
+      amqp_connection = Bunny.new(connection_params)
       amqp_connection.start
       self.channel = amqp_connection.create_channel
       self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
