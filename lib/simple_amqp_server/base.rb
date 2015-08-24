@@ -7,7 +7,7 @@ require_relative 'interaction'
 module SimpleAmqpServer
   class Base < Object
 
-    attr_accessor :logger, :config, :outgoing_queue, :incoming_queue, :channel, :halt_before_processing
+    attr_accessor :logger, :config, :connection, :outgoing_queue, :incoming_queue, :channel, :halt_before_processing
 
     def initialize(args = {})
       initialize_config(args[:config_file])
@@ -54,11 +54,12 @@ module SimpleAmqpServer
 
     def initialize_amqp
       begin
+        self.connection.close? if self.connection and self.connection.open?
         connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
-        amqp_connection = Bunny.new(connection_params)
-        amqp_connection.start
+        self.connection = Bunny.new(connection_params)
+        self.connection.start
         self.logger.info("Connected to AMQP server")
-        self.channel = amqp_connection.create_channel
+        self.channel = connection.create_channel
         self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
         self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
       rescue OpenSSL::SSL::SSLError => e
@@ -67,6 +68,10 @@ module SimpleAmqpServer
         sleep 5
         retry
       end
+    end
+
+    def ensure_connection
+      self.initialize_amqp unless self.connection and self.connection.open?
     end
 
     def run
@@ -79,7 +84,7 @@ module SimpleAmqpServer
       end
       service_saved_requests
       while true do
-        delivery_info, metadata, request = self.incoming_queue.pop
+        request = get_incoming_request
         if request
           self.service_incoming_request(request)
         else
@@ -137,8 +142,21 @@ module SimpleAmqpServer
       end
       unpersist_request(interaction)
       logger.info "Returning: #{interaction.response.to_json}"
-      outgoing_queue.channel.default_exchange.publish(interaction.response.to_json, :routing_key => outgoing_queue.name, :persistent => true) if self.outgoing_queue
+      send_outgoing_message(interaction.response.to_json)
       logger.info "Finished Request: #{interaction.uuid}"
+    end
+
+    def get_incoming_request
+      ensure_connection
+      delivery_info, metadata, request = self.incoming_queue.pop
+      request
+    end
+
+    def send_outgoing_message(message)
+      if self.outgoing_queue
+        ensure_connection
+        outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
+      end
     end
 
     def dispatch_and_handle_request(interaction)
