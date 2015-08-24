@@ -1,5 +1,5 @@
 require 'logging'
-require 'bunny'
+require 'march_hare'
 require 'fileutils'
 require 'retryable'
 require_relative 'config'
@@ -58,13 +58,12 @@ module SimpleAmqpServer
       begin
         self.connection.close? if self.connection and self.connection.open?
         connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
-        self.connection = Bunny.new(connection_params)
-        self.connection.start
+        self.connection = MarchHare.connect(connection_params)
         self.logger.info("Connected to AMQP server")
         self.channel = connection.create_channel
         self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
         self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
-      rescue OpenSSL::SSL::SSLError, Bunny::Exception, Timeout::Error => e
+      rescue OpenSSL::SSL::SSLError, MarchHare::Exception, Timeout::Error => e
         self.logger.error("Error opening amqp connection: #{e}")
         retries = [retries + 1, 3].min
         sleep 5 ** retries
@@ -150,7 +149,7 @@ module SimpleAmqpServer
     end
 
     def get_incoming_request
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error],
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [MarchHare::Exception, Timeout::Error],
                           :exception_cb => Proc.new { |e| self.logger.error("Error getting incoming request: #{e}") }) do
         ensure_connection
         delivery_info, metadata, request = self.incoming_queue.pop
@@ -159,7 +158,7 @@ module SimpleAmqpServer
     end
 
     def send_outgoing_message(message)
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error],
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [MarchHare::Exception, Timeout::Error],
                           :exception_cb => Proc.new { |e| self.logger.error("Error sending outgoing message: #{e}\nMessage: #{message}") }) do
         if self.outgoing_queue
           ensure_connection
