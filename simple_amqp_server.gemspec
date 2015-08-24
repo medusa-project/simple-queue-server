@@ -18,7 +18,11 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "bunny"
+  #Used to load bunny, because we need to take into account
+  #whether we are using jruby or not
+  #c.f. https://en.wikibooks.org/wiki/Ruby_Programming/RubyGems#How_to_install_different_versions_of_gems_depending_on_which_version_of_ruby_the_installee_is_using
+  spec.extensions = 'ext/gems.rb'
+
   spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
   spec.add_runtime_dependency "retryable"
