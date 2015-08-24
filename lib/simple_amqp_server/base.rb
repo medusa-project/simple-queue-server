@@ -150,7 +150,8 @@ module SimpleAmqpServer
     end
 
     def get_incoming_request
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error]) do
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error],
+                          :exception_cb => Proc.new { |e| self.logger.error("Error getting incoming request: #{e}") }) do
         ensure_connection
         delivery_info, metadata, request = self.incoming_queue.pop
         request
@@ -158,7 +159,8 @@ module SimpleAmqpServer
     end
 
     def send_outgoing_message(message)
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error]) do
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error],
+                          :exception_cb => Proc.new { |e| self.logger.error("Error sending outgoing message: #{e}\nMessage: #{message}") }) do
         if self.outgoing_queue
           ensure_connection
           outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
