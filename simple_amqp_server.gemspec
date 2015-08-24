@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   #Used to load bunny, because we need to take into account
   #whether we are using jruby or not
   #c.f. https://en.wikibooks.org/wiki/Ruby_Programming/RubyGems#How_to_install_different_versions_of_gems_depending_on_which_version_of_ruby_the_installee_is_using
-  spec.extensions = 'ext/gems.rb'
+  spec.extensions = 'ext/mkrf_conf.rb'
 
   spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
