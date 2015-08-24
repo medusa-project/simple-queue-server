@@ -1,6 +1,7 @@
 require 'logging'
 require 'bunny'
 require 'fileutils'
+require 'retryable'
 require_relative 'config'
 require_relative 'interaction'
 
@@ -53,6 +54,7 @@ module SimpleAmqpServer
     end
 
     def initialize_amqp
+      retries = -1
       begin
         self.connection.close? if self.connection and self.connection.open?
         connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
@@ -62,10 +64,11 @@ module SimpleAmqpServer
         self.channel = connection.create_channel
         self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
         self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
-      rescue OpenSSL::SSL::SSLError => e
+      rescue Exception => e
         self.logger.error("Error opening amqp connection: #{e}")
+        retries = [retries + 1, 3].min
+        sleep 5 ** retries
         self.logger.error("Retrying")
-        sleep 5
         retry
       end
     end
@@ -147,15 +150,19 @@ module SimpleAmqpServer
     end
 
     def get_incoming_request
-      ensure_connection
-      delivery_info, metadata, request = self.incoming_queue.pop
-      request
+      Retryable.retryable(:tries => 10, :sleep => 60) do
+        ensure_connection
+        delivery_info, metadata, request = self.incoming_queue.pop
+        request
+      end
     end
 
     def send_outgoing_message(message)
-      if self.outgoing_queue
-        ensure_connection
-        outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
+      Retryable.retryable(:tries => 10, :sleep => 60) do
+        if self.outgoing_queue
+          ensure_connection
+          outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
+        end
       end
     end
 
