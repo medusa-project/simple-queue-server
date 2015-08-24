@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["hding2@illinois.edu"]
   spec.summary       = %q{Simple way to make an AMQP server}
   spec.description   = %q{Follow some simple conventions to make a simple AMQP server.}
-  spec.homepage      = "https://github.com/medusa-project/simple-amqp-server"
+  spec.homepage      = "https://github.com/medusa-project/simple-amqp-server-jruby"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
