@@ -64,7 +64,7 @@ module SimpleAmqpServer
         self.channel = connection.create_channel
         self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
         self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
-      rescue Exception => e
+      rescue OpenSSL::SSL::SSLError, Bunny::Exception, Timeout::Error => e
         self.logger.error("Error opening amqp connection: #{e}")
         retries = [retries + 1, 3].min
         sleep 5 ** retries
@@ -150,7 +150,7 @@ module SimpleAmqpServer
     end
 
     def get_incoming_request
-      Retryable.retryable(:tries => 10, :sleep => 60) do
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error]) do
         ensure_connection
         delivery_info, metadata, request = self.incoming_queue.pop
         request
@@ -158,7 +158,7 @@ module SimpleAmqpServer
     end
 
     def send_outgoing_message(message)
-      Retryable.retryable(:tries => 10, :sleep => 60) do
+      Retryable.retryable(:tries => 10, :sleep => 60, :on => [Bunny::Exception, Timeout::Error]) do
         if self.outgoing_queue
           ensure_connection
           outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
