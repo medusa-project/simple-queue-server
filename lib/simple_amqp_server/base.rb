@@ -152,7 +152,7 @@ module SimpleAmqpServer
       Retryable.retryable(:tries => 10, :sleep => 60, :on => [MarchHare::Exception, Timeout::Error],
                           :exception_cb => Proc.new { |e| self.logger.error("Error getting incoming request: #{e}") }) do
         ensure_connection
-        delivery_info, metadata, request = self.incoming_queue.pop
+        metadata, request = self.incoming_queue.pop
         request
       end
     end
