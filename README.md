@@ -4,13 +4,15 @@ This gem makes it easy to put up a server listening and responding to requests v
 configure, follow the conventions for messages, and add handlers for each action you want to handle.
 
 As things are now this is a simple, single-threaded server. It wouldn't be that hard to extend it for additional
-functionality if desired. 
+functionality if desired, or multiple copies can be run with no modification.
+
+JRuby is needed for use of this gem.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'simple_amqp_server'
+    gem 'simple-amqp-server', git: 'https://github.com/medusa-project/simple-amqp-server-jruby.git'
 
 And then execute:
 
