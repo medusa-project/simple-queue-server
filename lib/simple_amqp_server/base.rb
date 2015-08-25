@@ -93,6 +93,8 @@ module SimpleAmqpServer
           sleep self.sleep_on_empty_time
         end
       end
+    rescue Exception => e
+      logger.error "Unexpected error: #{e}. Exiting"
     end
 
     def shutdown
