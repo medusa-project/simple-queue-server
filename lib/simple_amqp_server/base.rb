@@ -178,6 +178,7 @@ module SimpleAmqpServer
       end
     rescue Exception => e
       logger.error "Unknown Error: #{e.to_s}"
+      logger.error "Backtrace: #{e.backtrace}"
       interaction.fail_unknown
     end
 
