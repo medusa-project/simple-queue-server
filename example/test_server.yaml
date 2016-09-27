@@ -10,3 +10,7 @@ amqp:
   #Note that Bunny will want these as symbols, so the YAML should reflect that
   connection:
     :port: 5672
+log:
+  level: :info
+  show_responses: false
+  show_requests: false

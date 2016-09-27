@@ -30,7 +30,7 @@ When instantiating the server do so with the path to a YAML configuration file:
 
     MyServer.new(config_file: 'path/to/config')
     
-The config file has two required sections:
+The config file has three required sections:
 
 * server
     - name - required. Simply a string naming the server. This will be used to create a log directory, etc.
@@ -44,6 +44,12 @@ The config file has two required sections:
      blank or any entries are blank they simply get the defaults. Note that Bunny expects this hash to have 
       symbols for keys, so reflect that in the YAML.
       
+* log - note that for an optional log message to be generated the level must be high enough *and* the appropriate 
+flag must be turned on.
+    - level - optional, default :info. The base logging level
+    - show_requests - optional, default false. Whether to record incoming messages in the log.
+    - show_responses - optional, default false. Whether to record outgoing messages in the log.
+      
 A simple config file might look like:
       
     server:
@@ -53,7 +59,9 @@ A simple config file might look like:
       incoming_queue: in_to_test
       outgoing_queue: out_of_test
       connection:
-        :port: 5672      
+        :port: 5672  
+    log:
+      level: :info
   
 You may add any additional stanzas or keys to the config file that you like as required. The SimpleAmqpServer::Config 
 class loads the entire file and stores it for the servers use, and also provides a few convenience methods for getting

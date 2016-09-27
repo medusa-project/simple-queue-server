@@ -33,7 +33,7 @@ module SimpleAmqpServer
       [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
       self.logger = Logging.logger[config.server_name]
       self.logger.add_appenders(Logging.appenders.file(self.log_file, :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l: %m\n')))
-      self.logger.level = :info
+      self.logger.level = config.log(:level) || :info
       self.logger.info 'Starting server'
     end
 
@@ -122,7 +122,7 @@ module SimpleAmqpServer
 
     def service_incoming_request(request)
       interaction = self.interaction_class.new(request)
-      logger.info "Started Request: #{interaction.uuid}\n#{request}"
+      logger.info "Started Request: #{interaction.uuid}\n#{request}" if config.log(:show_requests)
       persist_request(interaction)
       service_request(interaction)
       shutdown if halt_before_processing
@@ -145,7 +145,7 @@ module SimpleAmqpServer
         dispatch_and_handle_request(interaction)
       end
       unpersist_request(interaction)
-      logger.info "Returning: #{interaction.response.to_json}"
+      logger.info "Returning: #{interaction.response.to_json}" if config.log(:show_responses)
       send_outgoing_message(interaction.response.to_json)
       logger.info "Finished Request: #{interaction.uuid}"
     end
