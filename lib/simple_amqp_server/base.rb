@@ -2,6 +2,7 @@ require 'logging'
 require 'march_hare'
 require 'fileutils'
 require 'retryable'
+require 'timeout'
 require_relative 'config'
 require_relative 'interaction'
 
