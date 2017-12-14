@@ -1,4 +1,5 @@
 require 'logging'
+require 'openssl'
 require 'march_hare'
 require 'fileutils'
 require 'retryable'
