@@ -12,11 +12,9 @@ module SimpleAmqpServer
     #the top level key is present but the specific config setting is not. Raise an error if the top level key is
     #not present
     def method_missing(name, *args)
-      if h = self.config[name.to_s]
-        self.find_value(h, args)
-      else
-        raise
-      end
+      raise unless self.config.key(name.to_s)
+      h = self.config[name.to_s]
+      self.find_value(h, args)
     end
 
     #Descend into a multilevel hash to extract a value or nil.
