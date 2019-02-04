@@ -4,7 +4,8 @@ This gem makes it easy to put up a server listening and responding to requests v
 configure, follow the conventions for messages, and add handlers for each action you want to handle.
 
 As things are now this is a simple, single-threaded server. It wouldn't be that hard to extend it for additional
-functionality if desired, or multiple copies can be run with no modification.
+functionality if desired, or multiple copies can be run with no modification. However, this original design
+is primarily intended for use in a server that is fairly mildly used.
 
 JRuby is needed for use of this gem.
 
