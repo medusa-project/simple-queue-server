@@ -1,0 +1,17 @@
+sudo: required
+
+language: ruby
+cache: bundler
+
+rvm:
+  - jruby
+
+services:
+- docker
+- rabbitmq
+
+before_install:
+- sudo apt-get update
+
+script:
+- bundle exec rake test
