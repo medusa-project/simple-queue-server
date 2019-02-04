@@ -11,7 +11,7 @@ class AmqpServerTest < Minitest::Test
 
   def teardown
     @connection.close
-    @server.close_amqp
+    @server.close_messenger
   end
 
   def config_file

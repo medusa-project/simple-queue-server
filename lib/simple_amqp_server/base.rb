@@ -6,16 +6,17 @@ require 'retryable'
 require 'timeout'
 require_relative 'config'
 require_relative 'interaction'
+require_relative 'messenger/amqp'
 
 module SimpleAmqpServer
   class Base < Object
 
-    attr_accessor :logger, :config, :connection, :outgoing_queue, :incoming_queue, :channel, :halt_before_processing
+    attr_accessor :logger, :config, :halt_before_processing, :messenger
 
     def initialize(args = {})
       initialize_config(args[:config_file])
       initialize_logger
-      initialize_amqp
+      self.messenger = SimpleAmqpServer::Messenger::Amqp.new(self.logger, config)
       self.halt_before_processing = false
     end
 
@@ -55,35 +56,6 @@ module SimpleAmqpServer
       File.join('run', "#{config.server_name}_active_requests")
     end
 
-    def initialize_amqp
-      retries = -1
-      begin
-        close_amqp
-        connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
-        self.connection = MarchHare.connect(connection_params)
-        self.logger.info("Connected to AMQP server")
-        self.channel = connection.create_channel
-        self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), :durable => true)
-        self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), :durable => true) if config.amqp(:outgoing_queue)
-      rescue OpenSSL::SSL::SSLError, MarchHare::Exception, Timeout::Error => e
-        self.logger.error("Error opening amqp connection: #{e}")
-        retries = [retries + 1, 3].min
-        sleep 5 ** retries
-        self.logger.error("Retrying")
-        retry
-      end
-    end
-
-    def close_amqp
-      self.logger.info("Trying to close amqp")
-      self.connection.close if self.connection and self.connection.open?
-      self.logger.info("Closed amqp") unless self.connection and self.connection.open?
-    end
-
-    def ensure_connection
-      self.initialize_amqp unless self.connection and self.connection.open?
-    end
-
     def run
       Kernel.at_exit do
         self.logger.info 'Stopping server'
@@ -97,7 +69,7 @@ module SimpleAmqpServer
         service_incoming_request_or_sleep
         break if self.halt_before_processing
       end
-      close_amqp
+      messenger.close
     rescue Exception => e
       logger.error "Unexpected error: #{e}. Exiting"
     end
@@ -126,7 +98,7 @@ module SimpleAmqpServer
     end
 
     def service_incoming_request_or_sleep
-      request = get_incoming_request
+      request = messenger.get_incoming_request
       if request
         self.service_incoming_request(request)
       else
@@ -160,27 +132,8 @@ module SimpleAmqpServer
       end
       unpersist_request(interaction)
       logger.info "Returning: #{interaction.response.to_json}" if config.log(:show_responses)
-      send_outgoing_message(interaction.response.to_json)
+      messenger.send_outgoing_message(interaction.response.to_json)
       logger.info "Finished Request: #{interaction.uuid}"
-    end
-
-    def get_incoming_request
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [MarchHare::Exception, Timeout::Error],
-                          :exception_cb => Proc.new { |e| self.logger.error("Error getting incoming request: #{e}") }) do
-        ensure_connection
-        metadata, request = self.incoming_queue.pop
-        request
-      end
-    end
-
-    def send_outgoing_message(message)
-      Retryable.retryable(:tries => 10, :sleep => 60, :on => [MarchHare::Exception, Timeout::Error],
-                          :exception_cb => Proc.new { |e| self.logger.error("Error sending outgoing message: #{e}\nMessage: #{message}") }) do
-        if self.outgoing_queue
-          ensure_connection
-          outgoing_queue.channel.default_exchange.publish(message, :routing_key => outgoing_queue.name, :persistent => true)
-        end
-      end
     end
 
     def dispatch_and_handle_request(interaction)
@@ -194,6 +147,10 @@ module SimpleAmqpServer
       logger.error "Unknown Error: #{e.to_s}"
       logger.error "Backtrace: #{e.backtrace}"
       interaction.fail_unknown
+    end
+
+    def close_messenger
+      self.messenger.close
     end
 
   end
