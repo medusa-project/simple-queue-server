@@ -40,8 +40,8 @@ The config file has three required sections:
     - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
     - outgoing_queue - optional. The name of the amqp queue to which the server sends response messages. If this
      is not provided then no outgoing messages will be sent.
-    - connection - optional. This hash is passed in its entirety to the Bunny gem for connection to AMQP. If it is
-     blank or any entries are blank they simply get the defaults. Note that Bunny expects this hash to have 
+    - connection - optional. This hash is passed in its entirety to the March Hare gem for connection to AMQP. If it is
+     blank or any entries are blank they simply get the defaults. Note that March Hare expects this hash to have 
       symbols for keys, so reflect that in the YAML.
       
 * log - note that for an optional log message to be generated the level must be high enough *and* the appropriate 
