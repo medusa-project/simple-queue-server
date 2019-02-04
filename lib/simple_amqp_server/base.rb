@@ -94,13 +94,8 @@ module SimpleAmqpServer
       end
       service_saved_requests
       while true do
-        request = get_incoming_request
-        if request
-          self.service_incoming_request(request)
-        else
-          break if self.halt_before_processing
-          sleep self.sleep_on_empty_time
-        end
+        service_incoming_request_or_sleep
+        break if self.halt_before_processing
       end
       close_amqp
     rescue Exception => e
@@ -127,6 +122,15 @@ module SimpleAmqpServer
         self.logger.info "Restarting Request: #{interaction.uuid}\n#{interaction.raw_request}"
         service_request(interaction)
         shutdown if halt_before_processing
+      end
+    end
+
+    def service_incoming_request_or_sleep
+      request = get_incoming_request
+      if request
+        self.service_incoming_request(request)
+      else
+        sleep self.sleep_on_empty_time
       end
     end
 

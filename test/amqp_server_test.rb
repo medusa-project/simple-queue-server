@@ -11,6 +11,7 @@ class AmqpServerTest < Minitest::Test
 
   def teardown
     @connection.close
+    @server.close_amqp
   end
 
   def config_file
@@ -42,13 +43,12 @@ class AmqpServerTest < Minitest::Test
   def outgoing_queue
     channel.queue(outgoing_queue_name, durable: true)
   end
-  
+
   def test_doubling
     number = rand(20)
     message = {action: 'double', parameters: {value: number}, pass_through: {id: 'someid'}}
     incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
-    @server.service_incoming_request(@server.get_incoming_request)
-    @server.close_amqp
+    @server.maybe_service_incoming_request
     metadata, payload = outgoing_queue.pop
     return_message = JSON.parse(payload)
     assert_equal 'double', return_message['action']
