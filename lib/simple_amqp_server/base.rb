@@ -58,7 +58,7 @@ module SimpleAmqpServer
     def initialize_amqp
       retries = -1
       begin
-        self.connection.close? if self.connection and self.connection.open?
+        self.connection.close if self.connection and self.connection.open?
         connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
         self.connection = MarchHare.connect(connection_params)
         self.logger.info("Connected to AMQP server")
@@ -92,6 +92,7 @@ module SimpleAmqpServer
         if request
           self.service_incoming_request(request)
         else
+          break if self.halt_before_processing
           sleep self.sleep_on_empty_time
         end
       end

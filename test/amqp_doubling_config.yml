@@ -1,0 +1,10 @@
+server:
+  name: amqp_doubling_server
+  sleep_on_empty: 0.01
+amqp:
+  incoming_queue: simple_amqp_server_test_in
+  outgoing_queue: simple_amqp_server_test_out
+  connection:
+    :port: 5672
+log:
+  level: :info

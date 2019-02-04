@@ -38,6 +38,8 @@ The config file has three required sections:
 * server
     - name - required. Simply a string naming the server. This will be used to create a log directory, etc.
     - sleep_on_empty - optional. The number of seconds to sleep when the incoming queue is empty. Default 60.
+    - max_total_requests - optional. The server will stop after servicing this many requests. Primarly intended
+      for testing, to ensure things stop.
 
 * amqp
     - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
@@ -119,6 +121,8 @@ information to formulate the response message.
 
 The following is a simple example that takes the 'number' parameter and returns its square as 'square'
 
+```ruby
+
     require_relative 'simple_amqp_server'
     
     class TestServer < SimpleAmqpServer::Base
@@ -129,6 +133,7 @@ The following is a simple example that takes the 'number' parameter and returns 
       end
     
     end
+```
 
 ### Running, logging, recovery, etc.
 
