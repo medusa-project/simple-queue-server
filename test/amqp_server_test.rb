@@ -48,7 +48,7 @@ class AmqpServerTest < Minitest::Test
     number = rand(20)
     message = {action: 'double', parameters: {value: number}, pass_through: {id: 'someid'}}
     incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
-    @server.maybe_service_incoming_request
+    @server.service_incoming_request_or_sleep
     metadata, payload = outgoing_queue.pop
     return_message = JSON.parse(payload)
     assert_equal 'double', return_message['action']
