@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/medusa-project/simple-amqp-server-jruby.svg?branch=master)](https://travis-ci.org/medusa-project/simple-amqp-server-jruby)
+
 # SimpleAmqpServer
 
 This gem makes it easy to put up a server listening and responding to requests via AMQP. Simply subclass SimpleAmqpServer::Base,
