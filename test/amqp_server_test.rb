@@ -7,13 +7,10 @@ class AmqpServerTest < Minitest::Test
     delete_queues
     create_queues
     @server = AmqpDoublingServer.new(config_file: config_file)
-    @server_thread = Thread.new do
-      @server.run
-    end
   end
 
   def teardown
-    @server.halt_before_processing = true
+    @connection.close
   end
 
   def config_file
@@ -45,16 +42,14 @@ class AmqpServerTest < Minitest::Test
   def outgoing_queue
     channel.queue(outgoing_queue_name, durable: true)
   end
-
+  
   def test_doubling
     number = rand(20)
     message = {action: 'double', parameters: {value: number}, pass_through: {id: 'someid'}}
     incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
-    while true
-      metadata, payload = outgoing_queue.pop
-      break if payload
-      sleep 0.1
-    end
+    @server.service_incoming_request(@server.get_incoming_request)
+    @server.close_amqp
+    metadata, payload = outgoing_queue.pop
     return_message = JSON.parse(payload)
     assert_equal 'double', return_message['action']
     assert_equal 'success', return_message['status']

@@ -58,7 +58,7 @@ module SimpleAmqpServer
     def initialize_amqp
       retries = -1
       begin
-        self.connection.close if self.connection and self.connection.open?
+        close_amqp
         connection_params = {:recover_from_connection_close => true}.merge(config.amqp(:connection) || {})
         self.connection = MarchHare.connect(connection_params)
         self.logger.info("Connected to AMQP server")
@@ -72,6 +72,12 @@ module SimpleAmqpServer
         self.logger.error("Retrying")
         retry
       end
+    end
+
+    def close_amqp
+      self.logger.info("Trying to close amqp")
+      self.connection.close if self.connection and self.connection.open?
+      self.logger.info("Closed amqp") unless self.connection and self.connection.open?
     end
 
     def ensure_connection
@@ -96,6 +102,7 @@ module SimpleAmqpServer
           sleep self.sleep_on_empty_time
         end
       end
+      close_amqp
     rescue Exception => e
       logger.error "Unexpected error: #{e}. Exiting"
     end
