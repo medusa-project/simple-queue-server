@@ -1,24 +1,16 @@
-if RUBY_PLATFORM == 'java'
-  require_relative 'amqp_jruby'
-else
-  require_relative 'amqp_mri'
-end
+require_relative 'amqp'
 require_relative 'sqs'
 
 class SimpleAmqpServer::Messenger::Factory
 
   def create(logger, config)
     if config.amqp
-      if RUBY_PLATFORM == 'java'
-        SimpleAmqpServer::Messenger::AmqpJruby.new(logger, config)
-      else
-        SimpleAmqpServer::Messenger::AmqpMri.new(logger, config)
-      end
+      SimpleAmqpServer::Messenger::Amqp.new(logger, config)
     elsif config.sqs
 
     else
       raise "No configuration for a known messenger."
     end
-  end
 
+  end
 end

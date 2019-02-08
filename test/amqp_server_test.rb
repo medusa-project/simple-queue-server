@@ -19,12 +19,8 @@ class AmqpServerTest < Minitest::Test
   end
 
   def amqp_connection
-    if RUBY_PLATFORM == 'java'
-      @connection ||= MarchHare.connect
-    else
-      @connection = Bunny.new
-      @connection.start
-    end
+    @connection = Bunny.new
+    @connection.start
   end
 
   def channel
@@ -50,11 +46,7 @@ class AmqpServerTest < Minitest::Test
   end
 
   def get_return_message
-    if RUBY_PLATFORM == 'java'
-      metadata, payload = outgoing_queue.pop
-    else
-      delivery_information, properties, payload = outgoing_queue.pop
-    end
+    delivery_information, properties, payload = outgoing_queue.pop
     JSON.parse(payload)
   end
 
