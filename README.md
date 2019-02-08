@@ -5,8 +5,11 @@
 This gem makes it easy to put up a server listening and responding to requests via a message queue. 
 Currently AMQP (RabbitMQ) and SQS. Simply subclass SimpleQueueServer::Base,
 configure, follow the conventions for messages, and add handlers for each action you want to handle.
+
 This is a successor of simple-amqp-server-jruby, renamed and reorganized to emphasize that it
-no longer requires jruby nor only does AMQP.
+no longer requires jruby nor only does AMQP. To migrate, all that is necessary should be to subclass from
+SimpleQueueServer::Base and to change any config handling to use the Config gem (so to use the Settings 
+constant) instead of the previous custom Config class.
 
 As things are now this is a simple, single-threaded server. It wouldn't be that hard to extend it for additional
 functionality if desired, or multiple copies can be run with no modification. However, this original design
