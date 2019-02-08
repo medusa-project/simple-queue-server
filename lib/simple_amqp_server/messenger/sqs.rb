@@ -7,7 +7,7 @@ class SimpleAmqpServer::Messenger::Sqs < SimpleAmqpServer::Messenger::Base
 
   def initialize(logger, config)
     super
-    self.client = Aws::SQS::Client.new(config.sqs(:connection))
+    self.client = Aws::SQS::Client.new(config.sqs['connection'])
     ensure_queues
   end
 
