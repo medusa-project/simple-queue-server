@@ -1,4 +1,4 @@
-#server and amqp stanzas are mandatory for a SimpleAmqpServer
+#server and either amqp or sqs stanzas are mandatory for a SimpleQueueServer
 server:
   name: test_server
   sleep_on_empty: 5

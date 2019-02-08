@@ -1,6 +1,6 @@
-require_relative '../lib/simple_amqp_server'
+require_relative '../lib/simple_queue_server'
 
-class DoublingServer < SimpleAmqpServer::Base
+class DoublingServer < SimpleQueueServer::Base
 
   def handle_double_request(interaction)
     number = interaction.request_parameter('value')

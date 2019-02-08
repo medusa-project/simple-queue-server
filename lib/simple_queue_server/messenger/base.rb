@@ -1,5 +1,5 @@
 require_relative '../messenger'
-class SimpleAmqpServer::Messenger::Base
+class SimpleQueueServer::Messenger::Base
 
   attr_accessor :logger
 

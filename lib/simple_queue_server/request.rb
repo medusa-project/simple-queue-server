@@ -1,5 +1,5 @@
 require 'json'
-module SimpleAmqpServer
+module SimpleQueueServer
   class Request < Object
 
     attr_accessor :json_request, :request_hash, :is_valid

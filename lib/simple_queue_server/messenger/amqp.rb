@@ -4,7 +4,7 @@ require 'retryable'
 require 'timeout'
 require 'openssl'
 
-class SimpleAmqpServer::Messenger::Amqp < SimpleAmqpServer::Messenger::Base
+class SimpleQueueServer::Messenger::Amqp < SimpleQueueServer::Messenger::Base
 
   attr_accessor :connection, :outgoing_queue, :incoming_queue, :channel
 

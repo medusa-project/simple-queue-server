@@ -3,7 +3,7 @@ require_relative 'response'
 require 'uuid'
 require 'json'
 
-module SimpleAmqpServer
+module SimpleQueueServer
   class Interaction < Object
 
     attr_accessor :uuid, :request, :response

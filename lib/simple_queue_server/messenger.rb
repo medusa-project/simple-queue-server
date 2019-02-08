@@ -1,4 +1,4 @@
-module SimpleAmqpServer
+module SimpleQueueServer
   module Messenger
 
   end

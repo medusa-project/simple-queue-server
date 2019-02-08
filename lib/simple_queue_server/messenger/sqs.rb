@@ -1,7 +1,7 @@
 require_relative 'base'
 require 'aws-sdk-sqs'
 
-class SimpleAmqpServer::Messenger::Sqs < SimpleAmqpServer::Messenger::Base
+class SimpleQueueServer::Messenger::Sqs < SimpleQueueServer::Messenger::Base
 
   attr_accessor :client, :incoming_queue_url, :outgoing_queue_url
 

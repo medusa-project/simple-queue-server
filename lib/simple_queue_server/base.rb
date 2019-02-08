@@ -4,7 +4,7 @@ require 'config'
 require_relative 'interaction'
 require_relative 'messenger/factory'
 
-module SimpleAmqpServer
+module SimpleQueueServer
   class Base < Object
 
     attr_accessor :logger, :halt_before_processing, :messenger
@@ -12,7 +12,7 @@ module SimpleAmqpServer
     def initialize(args = {})
       initialize_config(args[:config_file])
       initialize_logger
-      self.messenger = SimpleAmqpServer::Messenger::Factory.new.create(self.logger)
+      self.messenger = SimpleQueueServer::Messenger::Factory.new.create(self.logger)
       self.halt_before_processing = false
     end
 

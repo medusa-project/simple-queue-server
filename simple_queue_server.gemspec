@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'simple_amqp_server/version'
+require 'simple_queue_server/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "simple-amqp-server"
-  spec.version       = SimpleAmqpServer::VERSION
+  spec.name          = "simple-queue-server"
+  spec.version       = SimpleQueueServer::VERSION
   spec.authors       = ["Howard Ding"]
   spec.email         = ["hding2@illinois.edu"]
-  spec.summary       = %q{Simple way to make an AMQP server}
-  spec.description   = %q{Follow some simple conventions to make a simple AMQP server.}
-  spec.homepage      = "https://github.com/medusa-project/simple-amqp-server-jruby"
+  spec.summary       = %q{Simple way to make a server listening to AMQP or SQS}
+  spec.description   = %q{Follow some simple conventions to make a simple AMQP or SQS server.}
+  spec.homepage      = "https://github.com/medusa-project/simple-queue-server"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

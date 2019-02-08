@@ -1,21 +1,24 @@
 [![Build Status](https://travis-ci.org/medusa-project/simple-queue-server.svg?branch=master)](https://travis-ci.org/medusa-project/simple-queue-server)
 
-# SimpleAmqpServer
+# SimpleQueueServer
 
-This gem makes it easy to put up a server listening and responding to requests via AMQP. Simply subclass SimpleAmqpServer::Base,
+This gem makes it easy to put up a server listening and responding to requests via a message queue. 
+Currently AMQP (RabbitMQ) and SQS. Simply subclass SimpleQueueServer::Base,
 configure, follow the conventions for messages, and add handlers for each action you want to handle.
+This is a successor of simple-amqp-server-jruby, renamed and reorganized to emphasize that it
+no longer requires jruby nor only does AMQP.
 
 As things are now this is a simple, single-threaded server. It wouldn't be that hard to extend it for additional
 functionality if desired, or multiple copies can be run with no modification. However, this original design
 is primarily intended for use in a server that is fairly mildly used.
 
-JRuby is needed for use of this gem.
+This should work with either MRI or JRuby.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'simple-amqp-server', git: 'https://github.com/medusa-project/simple-amqp-server-jruby.git'
+    gem 'simple-queue-server', git: 'https://github.com/medusa-project/simple-queue-server.git'
 
 And then execute:
 
@@ -23,7 +26,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install simple_amqp_server
+    $ gem install simple_queue_server
 
 ## Usage
 
@@ -33,7 +36,7 @@ When instantiating the server do so with the path to a YAML configuration file:
 
     MyServer.new(config_file: 'path/to/config')
     
-The config file has three required sections:
+The config file has three required sections (one of amqp or sqs must be provided):
 
 * server
     - name - required. Simply a string naming the server. This will be used to create a log directory, etc.
@@ -41,7 +44,7 @@ The config file has three required sections:
     - max_total_requests - optional. The server will stop after servicing this many requests. Primarly intended
       for testing, to ensure things stop.
 
-* amqp
+* amqp - optional
     - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
     - outgoing_queue - optional. The name of the amqp queue to which the server sends response messages. If this
      is not provided then no outgoing messages will be sent.
@@ -49,6 +52,13 @@ The config file has three required sections:
      blank or any entries are blank they simply get the defaults. Note that March Hare expects this hash to have 
       symbols for keys, so reflect that in the YAML.
       
+* sqs - optional
+    - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
+    - outgoing_queue - optional. The name of the amqp queue to which the server sends response messages. If this
+     is not provided then no outgoing messages will be sent.
+    - connection - optional. The information needed to connect to an SQS server. Includes at least the access_key_id,
+      secret_access_key, and region. For testing locally 'endpoint' may be useful to specify.
+          
 * log - note that for an optional log message to be generated the level must be high enough *and* the appropriate 
 flag must be turned on.
     - level - optional, default :info. The base logging level
@@ -68,13 +78,11 @@ A simple config file might look like:
     log:
       level: :info
   
-You may add any additional stanzas or keys to the config file that you like as required. The SimpleAmqpServer::Config 
-class loads the entire file and stores it for the servers use, and also provides a few convenience methods for getting
-at values.
+See the config files in the test directory for examples.
+  
+You may add any additional stanzas or keys to the config file that you like as required. The 'Config' gem is used
+to store config settings.
 
-If you want a specialized config class you can override the config_class method of SimpleAmqpServer::Base and 
-subclass SimpleAmqpServer::Config. 
- 
 Note that both queues are persistent (the server will make them if they don't already exist) and outgoing messages
  are also persistent. 
 
@@ -112,7 +120,7 @@ The return message may contain any of the following:
 
 For each action you want to handle implement a handle_<action>_request(interaction) method. The Interaction class
 encapsulates the request and response; if you want a specialized class you can override interaction_class in your
-server class and subclass SimpleAmqpServer::Interaction.
+server class and subclass SimpleQueueServer::Interaction.
 
 Your handler takes the information in the request in the interaction and uses that to service the request. It fills out
 the necessary return information in the response in the interaction. After the handler is exited the server will use that 
@@ -122,9 +130,9 @@ The following is a simple example that takes the 'number' parameter and returns 
 
 ```ruby
 
-    require_relative 'simple_amqp_server'
+    require_relative 'simple_queue_server'
     
-    class TestServer < SimpleAmqpServer::Base
+    class TestServer < SimpleQueueServer::Base
     
       def handle_square_request(interaction)
         number = interaction.request_parameter('number')
@@ -162,5 +170,3 @@ deleted. However, if the server is otherwise interrupted (e.g. you kill its proc
 request remains on the file system. When the server is restarted it first takes any requests on the filesystem and services
 them before looking at the queue. (If you don't want this to happen, remove these before restarting. We may make this
 configurable in the future.)
-
-

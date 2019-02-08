@@ -1,4 +1,4 @@
-module SimpleAmqpServer
+module SimpleQueueServer
   class Response < Object
 
     UNRECOGNIZED_ACTION_MESSAGE = 'Unrecognized Action'

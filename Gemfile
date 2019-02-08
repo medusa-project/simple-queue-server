@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in simple_amqp_server.gemspec
+# Specify your gem's dependencies in simple_queue_server.gemspec
 gemspec
