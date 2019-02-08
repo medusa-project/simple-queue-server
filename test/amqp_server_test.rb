@@ -46,7 +46,11 @@ class AmqpServerTest < Minitest::Test
   end
 
   def get_return_message
-    delivery_information, properties, payload = outgoing_queue.pop
+    while true
+      delivery_information, properties, payload = outgoing_queue.pop
+      break if payload
+      sleep 0.1
+    end
     JSON.parse(payload)
   end
 
