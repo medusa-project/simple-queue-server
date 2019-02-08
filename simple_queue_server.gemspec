@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   #I'm not sure this will work, but given that we will always install this directly from the git repo, it might
   # If the gem were prebuilt I don't think it would.
   spec.add_runtime_dependency 'bunny'
+  spec.add_runtime_dependency 'march_hare' if RUBY_PLATFORM == 'java'
   spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
   spec.add_runtime_dependency "retryable"

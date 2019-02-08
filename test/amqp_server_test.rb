@@ -18,8 +18,7 @@ class AmqpServerTest < Minitest::Test
   end
 
   def amqp_connection
-    @connection = Bunny.new
-    @connection.start
+    @server.connection
   end
 
   def channel
@@ -37,7 +36,11 @@ class AmqpServerTest < Minitest::Test
   def get_return_message
     #sleep a bit to make sure message has time to get into the queue
     sleep 0.1
-    delivery_information, properties, payload = outgoing_queue.pop
+    if RUBY_PLATFORM == 'java'
+      metadata, payload = outgoing_queue.pop
+    else
+      delivery_information, properties, payload = outgoing_queue.pop
+    end
     JSON.parse(payload)
   end
 

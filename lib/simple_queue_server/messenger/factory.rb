@@ -1,11 +1,16 @@
-require_relative 'amqp'
+require_relative 'amqp_bunny'
+require_relative 'amqp_java' if RUBY_PLATFORM == 'java'
 require_relative 'sqs'
 
 class SimpleQueueServer::Messenger::Factory
 
   def create(logger)
     if Settings.amqp
-      SimpleQueueServer::Messenger::Amqp.new(logger)
+      if RUBY_PLATFORM == 'java'
+        SimpleQueueServer::Messenger::AmqpJava.new(logger)
+      else
+        SimpleQueueServer::Messenger::AmqpBunny.new(logger)
+      end
     elsif Settings.sqs
       SimpleQueueServer::Messenger::Sqs.new(logger)
     else
