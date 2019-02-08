@@ -5,15 +5,15 @@ class SimpleAmqpServer::Messenger::Sqs < SimpleAmqpServer::Messenger::Base
 
   attr_accessor :client, :incoming_queue_url, :outgoing_queue_url
 
-  def initialize(logger, config)
+  def initialize(logger)
     super
-    self.client = Aws::SQS::Client.new(config.sqs['connection'])
+    self.client = Aws::SQS::Client.new(Settings.sqs.connection.to_h)
     ensure_queues
   end
 
   def ensure_queues
-    incoming_name = config.sqs['incoming_queue']
-    outgoing_name = config.sqs['outgoing_queue']
+    incoming_name = Settings.sqs.incoming_queue
+    outgoing_name = Settings.sqs.outgoing_queue
     self.incoming_queue_url, self.outgoing_queue_url = [incoming_name, outgoing_name].collect do |name|
       url = begin
         client.get_queue_url(queue_name: name).queue_url

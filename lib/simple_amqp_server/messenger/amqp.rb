@@ -8,18 +8,18 @@ class SimpleAmqpServer::Messenger::Amqp < SimpleAmqpServer::Messenger::Base
 
   attr_accessor :connection, :outgoing_queue, :incoming_queue, :channel
 
-  def initialize(logger, config)
+  def initialize(logger)
     super
     retries = -1
     begin
       close
-      connection_params = {recover_from_connection_close: true}.merge(config.amqp(:connection) || {})
+      connection_params = {recover_from_connection_close: true}.merge(Settings.amqp.connection.to_h || {})
       self.connection = Bunny.new(connection_params)
       self.connection.start
       self.logger.info("Connected to AMQP server")
       self.channel = connection.create_channel
-      self.incoming_queue = self.channel.queue(config.amqp(:incoming_queue), durable: true)
-      self.outgoing_queue = self.channel.queue(config.amqp(:outgoing_queue), durable: true) if config.amqp(:outgoing_queue)
+      self.incoming_queue = self.channel.queue(Settings.amqp.incoming_queue, durable: true)
+      self.outgoing_queue = self.channel.queue(Settings.amqp.outgoing_queue, durable: true) if Settings.amqp.outgoing_queue
     rescue OpenSSL::SSL::SSLError, Timeout::Error, Bunny::Exception => e
       self.logger.error("Error opening amqp connection: #{e}")
       retries = [retries + 1, 3].min
@@ -63,7 +63,7 @@ class SimpleAmqpServer::Messenger::Amqp < SimpleAmqpServer::Messenger::Base
   private
 
   def ensure_connection
-    self.initialize(self.logger, self.config) unless self.connection and self.connection.open?
+    self.initialize(self.logger) unless self.connection and self.connection.open?
   end
 
 end

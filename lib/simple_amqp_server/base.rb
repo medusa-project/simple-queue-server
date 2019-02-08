@@ -1,23 +1,19 @@
 require 'logging'
 require 'fileutils'
-require_relative 'config'
+require 'config'
 require_relative 'interaction'
 require_relative 'messenger/factory'
 
 module SimpleAmqpServer
   class Base < Object
 
-    attr_accessor :logger, :config, :halt_before_processing, :messenger
+    attr_accessor :logger, :halt_before_processing, :messenger
 
     def initialize(args = {})
       initialize_config(args[:config_file])
       initialize_logger
-      self.messenger = SimpleAmqpServer::Messenger::Factory.new.create(self.logger, self.config)
+      self.messenger = SimpleAmqpServer::Messenger::Factory.new.create(self.logger)
       self.halt_before_processing = false
-    end
-
-    def config_class
-      Config
     end
 
     def interaction_class
@@ -25,14 +21,14 @@ module SimpleAmqpServer
     end
 
     def initialize_config(config_file)
-      self.config = self.config_class.new(config_file)
+      Config.load_and_set_settings(config_file)
     end
 
     def initialize_logger
       [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
-      self.logger = Logging.logger[config.server_name]
+      self.logger = Logging.logger[Settings.server_name]
       self.logger.add_appenders(Logging.appenders.file(self.log_file, :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l: %m\n')))
-      self.logger.level = config.log(:level) || :info
+      self.logger.level = Settings.log.level || :info
       self.logger.info 'Starting server'
     end
 
@@ -41,7 +37,7 @@ module SimpleAmqpServer
     end
 
     def log_file
-      File.join('log', "#{config.server_name}.log")
+      File.join('log', "#{Settings.server_name}.log")
     end
 
     def run_directory
@@ -49,7 +45,7 @@ module SimpleAmqpServer
     end
 
     def request_directory
-      File.join('run', "#{config.server_name}_active_requests")
+      File.join('run', "#{Settings.server_name}_active_requests")
     end
 
     def run
@@ -81,7 +77,7 @@ module SimpleAmqpServer
     end
 
     def sleep_on_empty_time
-      config.server(:sleep_on_empty) || 60
+      Settings.server.sleep_on_empty || 60
     end
 
     def service_saved_requests
@@ -104,7 +100,7 @@ module SimpleAmqpServer
 
     def service_incoming_request(request)
       interaction = self.interaction_class.new(request)
-      logger.info "Started Request: #{interaction.uuid}\n#{request}" if config.log(:show_requests)
+      logger.info "Started Request: #{interaction.uuid}\n#{request}" if Settings.log.show_requests
       persist_request(interaction)
       service_request(interaction)
       shutdown if halt_before_processing
@@ -127,7 +123,7 @@ module SimpleAmqpServer
         dispatch_and_handle_request(interaction)
       end
       unpersist_request(interaction)
-      logger.info "Returning: #{interaction.response.to_json}" if config.log(:show_responses)
+      logger.info "Returning: #{interaction.response.to_json}" if Settings.log.show_responses
       messenger.send_outgoing_message(interaction.response.to_json)
       logger.info "Finished Request: #{interaction.uuid}"
     end
