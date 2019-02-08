@@ -2,6 +2,8 @@
 
 # SimpleAmqpServer
 
+*This is deprecated in favor of SimpleQueueServer, also in the medusa-project*
+
 This gem makes it easy to put up a server listening and responding to requests via AMQP. Simply subclass SimpleAmqpServer::Base,
 configure, follow the conventions for messages, and add handlers for each action you want to handle.
 
