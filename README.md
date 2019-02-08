@@ -101,13 +101,12 @@ The return message may contain any of the following:
 
   * action - the action the client requested of the server
   * status - either 'success' or 'failure', with the obvious meaning
-  * error_message - in the event of failure a short message about the failure. There are some standard messages for
+  * message - in the event of failure a short message about the failure. There are some standard messages for
   things like being unable to parse the incoming message or not finding the requested action.
   * parameters - anything else that the server wants to return to the client
   * pass_through - whatever the client originally sent in its pass_through. An empty hash if this was not provided.
-  
-In the event that the server was unable to parse the incoming message it obviously can't return things like the action 
-or pass_through, so instead it returns the entire original request as 'raw_request' in the parameters.
+  * raw_request - in the event the the original message could not be parsed things like the action and pass_through
+  cannot be returned, so in that case the incoming message is returned here verbatim.
 
 ### Implementing server functionality
 

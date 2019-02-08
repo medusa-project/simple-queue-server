@@ -18,7 +18,13 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'march_hare'
+  #I'm not sure this will work, but given that we will always install this directly from the git repo, it might
+  # If the gem were prebuilt I don't think it would.
+  if RUBY_PLATFORM == 'java'
+    spec.add_runtime_dependency 'march_hare'
+  else
+    spec.add_runtime_dependency 'bunny'
+  end
   spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
   spec.add_runtime_dependency "retryable"

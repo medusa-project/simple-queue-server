@@ -1,12 +1,8 @@
 require 'logging'
-require 'openssl'
-require 'march_hare'
 require 'fileutils'
-require 'retryable'
-require 'timeout'
 require_relative 'config'
 require_relative 'interaction'
-require_relative 'messenger/amqp'
+require_relative 'messenger/factory'
 
 module SimpleAmqpServer
   class Base < Object
@@ -16,7 +12,7 @@ module SimpleAmqpServer
     def initialize(args = {})
       initialize_config(args[:config_file])
       initialize_logger
-      self.messenger = SimpleAmqpServer::Messenger::Amqp.new(self.logger, config)
+      self.messenger = SimpleAmqpServer::Messenger::Factory.new.create(self.logger, self.config)
       self.halt_before_processing = false
     end
 
