@@ -1,51 +1,49 @@
 require_relative 'test_helper'
 require_relative 'doubling_server'
 
-class AmqpServerTest < Minitest::Test
+class SqsServerTest < Minitest::Test
 
   def setup
     @server = DoublingServer.new(config_file: config_file)
     @messenger = @server.messenger
-    @messenger.purge_queues
   end
 
   def teardown
+    @messenger.purge_queues
     @server.close_messenger
   end
 
   def config_file
-    File.join(File.dirname(__FILE__), 'amqp_doubling_config.yml')
+    File.join(File.dirname(__FILE__), 'sqs_doubling_config.yml')
   end
 
-  def amqp_connection
-    @connection = Bunny.new
-    @connection.start
+  def incoming_queue_url
+    @messenger.incoming_queue_url
   end
 
-  def channel
-    @channel = amqp_connection.create_channel
+  def outgoing_queue_url
+    @messenger.outgoing_queue_url
   end
 
-  def incoming_queue
-    @messenger.incoming_queue
+  def client
+    @messenger.client
   end
 
-  def outgoing_queue
-    @messenger.outgoing_queue
-  end
-
-  def get_return_message
-    #sleep a bit to make sure message has time to get into the queue
+  def get_return_message(retries: 10)
     sleep 0.1
-    delivery_information, properties, payload = outgoing_queue.pop
-    JSON.parse(payload)
+    message = client.receive_message(queue_url: outgoing_queue_url, max_number_of_messages: 1).messages.first
+    unless message
+      return nil if retries.zero?
+      return get_return_message(retries: retries - 1)
+    end
+    client.delete_message(queue_url: outgoing_queue_url, receipt_handle: message.receipt_handle)
+    JSON.parse(message.body)
   end
 
   def send_message(message, jsonize: true)
     message = message.to_json if jsonize
-    incoming_queue.channel.default_exchange.publish(message, routing_key: incoming_queue.name, persistent: true)
-    #give a little bit of time to make sure the message appears before trying to process it
-    sleep 0.1
+    client.send_message(queue_url: incoming_queue_url, message_body: message)
+    sleep 0.2
   end
 
   def test_doubling
@@ -90,5 +88,8 @@ class AmqpServerTest < Minitest::Test
     assert_equal message, return_message['raw_request']
     assert_equal 'Invalid Request', return_message['message']
   end
+
+  private
+
 
 end

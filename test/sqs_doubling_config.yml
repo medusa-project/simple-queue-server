@@ -1,0 +1,13 @@
+server:
+  name: sqs_doubling_server
+  sleep_on_empty: 0.01
+sqs:
+  incoming_queue: simple_amqp_server_test_in
+  outgoing_queue: simple_amqp_server_test_out
+  connection:
+    endpoint: http://localhost:9324
+    access_key_id: someid
+    secret_access_key: somekey
+    region: us-east-2
+log:
+  level: :info

@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
   spec.add_runtime_dependency "retryable"
+  spec.add_runtime_dependency "aws-sdk-sqs"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"

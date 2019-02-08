@@ -4,10 +4,10 @@ require_relative 'sqs'
 class SimpleAmqpServer::Messenger::Factory
 
   def create(logger, config)
-    if config.amqp
+    if config.amqp?
       SimpleAmqpServer::Messenger::Amqp.new(logger, config)
-    elsif config.sqs
-
+    elsif config.sqs?
+      SimpleAmqpServer::Messenger::Sqs.new(logger, config)
     else
       raise "No configuration for a known messenger."
     end

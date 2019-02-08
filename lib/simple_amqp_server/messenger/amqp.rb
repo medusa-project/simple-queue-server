@@ -54,6 +54,12 @@ class SimpleAmqpServer::Messenger::Amqp < SimpleAmqpServer::Messenger::Base
     end
   end
 
+  def purge_queues
+    [incoming_queue, outgoing_queue].each do |queue|
+      queue.purge
+    end
+  end
+
   private
 
   def ensure_connection

@@ -27,6 +27,14 @@ module SimpleAmqpServer
       end
     end
 
+    def amqp?
+      config['amqp']
+    end
+
+    def sqs?
+      config['sqs']
+    end
+
     def server_name
       self.server(:name) || (raise NotImplementedError, 'You must define the server.name configuration key')
     end

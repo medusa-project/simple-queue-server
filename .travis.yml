@@ -13,6 +13,8 @@ services:
 
 before_install:
 - sudo apt-get update
+- docker pull softwaremill/elasticmq:latest
+- docker run -d -p 9324:9324 --name sqs-server softwaremill/elasticmq:latest
 
 script:
 - bundle exec rake test
