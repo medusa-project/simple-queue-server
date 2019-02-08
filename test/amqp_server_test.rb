@@ -4,8 +4,8 @@ require_relative 'amqp_doubling_server'
 class AmqpServerTest < Minitest::Test
 
   def setup
-    delete_queues
-    create_queues
+    ensure_queues
+    purge_queues
     @server = AmqpDoublingServer.new(config_file: config_file)
   end
 
@@ -27,12 +27,12 @@ class AmqpServerTest < Minitest::Test
     @channel = amqp_connection.create_channel
   end
 
-  def delete_queues
-    incoming_queue.delete
-    outgoing_queue.delete
+  def purge_queues
+    incoming_queue.purge
+    outgoing_queue.purge
   end
 
-  def create_queues
+  def ensure_queues
     incoming_queue
     outgoing_queue
   end
@@ -46,18 +46,16 @@ class AmqpServerTest < Minitest::Test
   end
 
   def get_return_message
-    while true
-      delivery_information, properties, payload = outgoing_queue.pop
-      break if payload
-      sleep 0.1
-    end
+    #sleep a bit to make sure message has time to get into the queue
+    sleep 0.1
+    delivery_information, properties, payload = outgoing_queue.pop
     JSON.parse(payload)
   end
 
   def test_doubling
     number = rand(20)
     message = {action: 'double', parameters: {value: number}, pass_through: {id: 'someid'}}
-    incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
+    send_message(message)
     @server.service_incoming_request_or_sleep
     return_message = get_return_message
     assert_equal 'double', return_message['action']
@@ -66,9 +64,16 @@ class AmqpServerTest < Minitest::Test
     assert_equal number * 2, return_message['parameters']['value']
   end
 
+  def send_message(message, jsonize: true)
+    message = message.to_json if jsonize
+    incoming_queue.channel.default_exchange.publish(message, routing_key: incoming_queue.name, persistent: true)
+    #give a little bit of time to make sure the message appears before trying to process it
+    sleep 0.1
+  end
+
   def test_unrecognized_action
     message = {action: 'triple', parameters: {value: 0}, pass_through: {id: 'someid'}}
-    incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
+    send_message(message)
     @server.service_incoming_request_or_sleep
     return_message = get_return_message
     assert_equal 'triple', return_message['action']
@@ -79,7 +84,7 @@ class AmqpServerTest < Minitest::Test
 
   def test_expected_failure
     message = {action: 'double', parameters: {value: 'joe'}, pass_through: {id: 'someid'}}
-    incoming_queue.channel.default_exchange.publish(message.to_json, routing_key: incoming_queue.name, persistent: true)
+    send_message(message)
     @server.service_incoming_request_or_sleep
     return_message = get_return_message
     assert_equal 'double', return_message['action']
@@ -90,7 +95,7 @@ class AmqpServerTest < Minitest::Test
 
   def test_invalid_request
     message = "Not JSON"
-    incoming_queue.channel.default_exchange.publish(message, routing_key: incoming_queue.name, persistent: true)
+    send_message(message, jsonize: false)
     @server.service_incoming_request_or_sleep
     return_message = get_return_message
     assert_equal message, return_message['raw_request']
