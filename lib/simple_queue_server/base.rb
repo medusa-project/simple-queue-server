@@ -36,7 +36,7 @@ module SimpleQueueServer
     end
 
     def log_file
-      File.join('log', "#{Settings.server_name}.log")
+      File.join('log', "#{Settings.server.name}.log")
     end
 
     def run_directory
