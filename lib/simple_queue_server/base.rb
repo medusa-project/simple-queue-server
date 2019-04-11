@@ -1,4 +1,4 @@
-require 'logging'
+require 'logger'
 require 'fileutils'
 require 'config'
 require_relative 'interaction'
@@ -26,8 +26,7 @@ module SimpleQueueServer
 
     def initialize_logger
       [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
-      self.logger = Logging.logger[Settings.server_name]
-      self.logger.add_appenders(Logging.appenders.file(self.log_file, :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l: %m\n')))
+      self.logger = Logger.new(self.log_file)
       self.logger.level = Settings.log.level || :info
       self.logger.info 'Starting server'
     end

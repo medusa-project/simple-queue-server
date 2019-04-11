@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   # If the gem were prebuilt I don't think it would.
   spec.add_runtime_dependency 'bunny'
   spec.add_runtime_dependency 'march_hare' if RUBY_PLATFORM == 'java'
-  spec.add_runtime_dependency "logging"
   spec.add_runtime_dependency "uuid"
   spec.add_runtime_dependency "retryable"
   spec.add_runtime_dependency "aws-sdk-sqs"
