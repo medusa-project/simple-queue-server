@@ -12,5 +12,8 @@ amqp:
     :port: 5672
 log:
   level: :info
+  #If destination is set to 'stdout' then the log will go to standard out. If it is set to a path then it will go to that
+  #path. Otherwise it goes to a default path based on the server name.
+  destination: ~
   show_responses: false
   show_requests: false

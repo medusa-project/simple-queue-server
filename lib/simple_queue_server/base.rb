@@ -26,7 +26,7 @@ module SimpleQueueServer
 
     def initialize_logger
       [self.log_directory, self.run_directory, self.request_directory].each { |directory| FileUtils.mkdir_p(directory) }
-      self.logger = Logger.new(self.log_file)
+      self.logger = Logger.new(self.log_destination)
       self.logger.level = Settings.log.level || :info
       self.logger.info 'Starting server'
     end
@@ -35,8 +35,15 @@ module SimpleQueueServer
       'log'
     end
 
-    def log_file
-      File.join('log', "#{Settings.server.name}.log")
+    def log_destination
+      config_name = Settings.log.destination
+      if config_name == 'stdout'
+        STDOUT
+      elsif config_name
+        config_name
+      else
+        File.join('log', "#{Settings.server.name}.log")
+      end
     end
 
     def run_directory
