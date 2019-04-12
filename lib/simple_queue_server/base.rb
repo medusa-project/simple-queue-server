@@ -44,7 +44,7 @@ module SimpleQueueServer
     end
 
     def request_directory
-      File.join('run', "#{Settings.server_name}_active_requests")
+      File.join('run', "#{Settings.server.name}_active_requests")
     end
 
     def run
