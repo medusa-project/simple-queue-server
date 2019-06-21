@@ -69,7 +69,9 @@ module SimpleQueueServer
       end
       messenger.close
     rescue Exception => e
-      logger.error "Unexpected error: #{e}. Exiting"
+      logger.error "Unexpected error in main loop: #{e}. Exiting"
+      logger.error "Backtrace: #{e.backtrace}"
+      raise
     end
 
     def shutdown
