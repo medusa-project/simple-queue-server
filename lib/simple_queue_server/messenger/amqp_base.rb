@@ -21,7 +21,7 @@ class SimpleQueueServer::Messenger::AmqpBase < SimpleQueueServer::Messenger::Bas
       self.outgoing_queue = self.channel.queue(Settings.amqp.outgoing_queue, durable: true) if Settings.amqp.outgoing_queue
     rescue OpenSSL::SSL::SSLError, Timeout::Error, amqp_error_class => e
       self.logger.error("Error opening amqp connection: #{e}")
-      self.logger.error("Backtrace: #{e.backtrace}"
+      self.logger.error("Backtrace: #{e.backtrace}")
       retries = [retries + 1, 3].min
       sleep 5 ** retries
       self.logger.error("Retrying")
