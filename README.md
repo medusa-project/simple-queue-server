@@ -51,10 +51,12 @@ The config file has three required sections (one of amqp or sqs must be provided
     - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
     - outgoing_queue - optional. The name of the amqp queue to which the server sends response messages. If this
      is not provided then no outgoing messages will be sent.
-    - connection - optional. This hash is passed in its entirety to the March Hare gem for connection to AMQP. If it is
-     blank or any entries are blank they simply get the defaults. Note that March Hare expects this hash to have 
+    - connection - optional. This hash is passed in its entirety to the March Hare or Bunny gem for connection to AMQP. If it is
+     blank or any entries are blank they simply get the defaults. Note that the gem expects this hash to have 
       symbols for keys, so reflect that in the YAML.
-      
+    - max_connection_retry_errors - optional. The maximum number of times to try to recover from a connection
+      retry error. If not set then infinite. If set then after that number of retries the error will be 
+      reraised.
 * sqs - optional
     - incoming_queue - required. The name of the amqp queue off of which the server takes messages to service.
     - outgoing_queue - optional. The name of the amqp queue to which the server sends response messages. If this

@@ -9,7 +9,7 @@ class SimpleQueueServer::Messenger::AmqpBase < SimpleQueueServer::Messenger::Bas
 
   def initialize(logger)
     super
-    retries = -1
+    attempted_retries = 0
     begin
       close
       connection_params = {recover_from_connection_close: true}.merge(Settings.amqp.connection.to_h || {})
@@ -21,11 +21,12 @@ class SimpleQueueServer::Messenger::AmqpBase < SimpleQueueServer::Messenger::Bas
       self.outgoing_queue = self.channel.queue(Settings.amqp.outgoing_queue, durable: true) if Settings.amqp.outgoing_queue
     rescue OpenSSL::SSL::SSLError, Timeout::Error, amqp_error_class => e
       self.logger.error("Error opening amqp connection: #{e}")
-      self.logger.error("Backtrace: #{e.backtrace}"
-      retries = [retries + 1, 3].min
-      sleep 5 ** retries
+      self.logger.error("Backtrace: #{e.backtrace}")
+      attempted_retries = attempted_retries + 1
+      raise if Settings.amqp.max_connection_retry_errors and attempted_retries > Settings.amqp.max_connection_retry_errors
+      sleep_factor = [attempted_retries + 1, 3].min
+      sleep 5 ** sleep_factor
       self.logger.error("Retrying")
-      raise
       retry
     end
   end
